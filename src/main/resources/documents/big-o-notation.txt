@@ -1,0 +1,19 @@
+Big O Notation — Algorithm Complexity Guide
+
+Big O notation describes the worst-case performance of an algorithm as input size (n) grows. It helps compare algorithms regardless of hardware.
+
+O(1) — Constant Time: The operation takes the same time regardless of input size. Example: Accessing an array element by index. arr[5] always takes one step.
+
+O(log n) — Logarithmic Time: Input is halved each step. Very efficient. Example: Binary search on a sorted array. Finding a name in a phone book by splitting it in half repeatedly.
+
+O(n) — Linear Time: Time grows directly with input size. Example: Linear search — checking every item in a list one by one to find a match.
+
+O(n log n) — Linearithmic Time: Common in efficient sorting algorithms. Example: Merge sort and quicksort (average case). Much better than O(n²) for large datasets.
+
+O(n²) — Quadratic Time: Nested loops over the input. Gets slow quickly. Example: Bubble sort — comparing every element with every other element.
+
+O(2ⁿ) — Exponential Time: Doubles with each addition to input. Avoid for large n. Example: Naive recursive Fibonacci, solving the Towers of Hanoi.
+
+Space Complexity: Big O also applies to memory. An algorithm storing n items uses O(n) space. Recursive algorithms use O(n) stack space for n recursive calls.
+
+Rule of thumb: Always aim for O(1) or O(log n). O(n log n) is acceptable for sorting. O(n²) and above should be avoided for large inputs.

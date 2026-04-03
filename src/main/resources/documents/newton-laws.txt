@@ -1,0 +1,9 @@
+Newton's Three Laws of Motion
+
+First Law (Law of Inertia): An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction unless acted upon by an unbalanced external force. Example: A ball rolling on a frictionless surface would roll forever. In real life, friction stops it.
+
+Second Law (F = ma): The acceleration of an object depends on the net force acting on it and its mass. Force equals mass times acceleration. A heavier object requires more force to accelerate at the same rate as a lighter one. Example: Pushing a shopping cart versus pushing a car with the same force — the cart accelerates much more.
+
+Third Law (Action-Reaction): For every action, there is an equal and opposite reaction. Forces always come in pairs. Example: When you jump, you push down on the Earth, and the Earth pushes you up with equal force. Rocket engines work on this principle — hot gases are expelled downward, pushing the rocket upward.
+
+Applications: Newton's laws form the foundation of classical mechanics. They explain planetary motion, vehicle dynamics, sports physics, and engineering design. They hold true for everyday speeds but break down near the speed of light, where Einstein's relativity takes over.
