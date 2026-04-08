@@ -20,8 +20,11 @@ public class RagService {
 
     private static final String RAG_PROMPT_TEMPLATE = """
             You are a helpful and friendly student assistant AI.
-            Use the context below (retrieved from study materials) to answer the student's question.
-            If the context does not contain enough information, say so honestly and give a general answer.
+            Use the context below (retrieved from study materials) to answer
+            the student's question accurately.
+            If the context does not contain enough information, say so honestly.
+
+            Retrieved Context Quality: {relevanceSummary}
 
             Context:
             {context}
@@ -32,31 +35,60 @@ public class RagService {
             """;
 
     private final VectorStore vectorStore;
+    private final FuzzyRelevanceScorer fuzzyScorer;
     private final ChatClient chatClient;
 
-    public RagService(VectorStore vectorStore, ChatClient.Builder chatClientBuilder) {
+    public RagService(VectorStore vectorStore, FuzzyRelevanceScorer fuzzyScorer,
+            ChatClient.Builder chatClientBuilder) {
         this.vectorStore = vectorStore;
+        this.fuzzyScorer = fuzzyScorer;
         this.chatClient = chatClientBuilder.build();
     }
 
     public String getAnswer(String question) {
-        SearchRequest searchRequest = SearchRequest.builder().query(question).topK(5).build();
+        SearchRequest searchRequest = SearchRequest.builder().query(question).topK(8).build();
         List<Document> results = Optional.ofNullable(vectorStore.similaritySearch(searchRequest))
                 .orElse(List.of());
 
         String context;
+        String relevanceSummary;
         if (results.isEmpty()) {
-            context = "No relevant documents found.";
+            context = "No sufficiently relevant documents found for this question.";
+            relevanceSummary = "Context quality — High: 0, Medium: 0, Low: 0";
         } else {
-            context = results.stream()
-                    .map(Document::getText)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining("\n\n---\n\n"));
+            List<Double> similarityScores = results.stream()
+                    .map(doc -> {
+                        String distanceStr = doc.getMetadata().getOrDefault("distance", "0.5").toString();
+                        try {
+                            return 1.0 - Double.parseDouble(distanceStr);
+                        } catch (NumberFormatException ex) {
+                            return 0.5;
+                        }
+                    })
+                    .toList();
+
+            List<FuzzyRelevanceScorer.ScoredDocument> scoredDocs =
+                    fuzzyScorer.scoreAndFilter(results, similarityScores);
+
+            if (scoredDocs.isEmpty()) {
+                context = "No sufficiently relevant documents found for this question.";
+                relevanceSummary = "Context quality — High: 0, Medium: 0, Low: 0";
+            } else {
+                context = scoredDocs.stream()
+                        .map(FuzzyRelevanceScorer.ScoredDocument::getDocument)
+                        .map(Document::getText)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining("\n\n---\n\n"));
+                relevanceSummary = fuzzyScorer.getRelevanceSummary(scoredDocs);
+            }
         }
 
         log.info("Retrieved {} relevant chunks for question", results.size());
 
-        Map<String, Object> model = Map.of("context", context, "question", question);
+        Map<String, Object> model = Map.of(
+                "context", context,
+                "question", question,
+                "relevanceSummary", relevanceSummary);
         Prompt prompt = new PromptTemplate(RAG_PROMPT_TEMPLATE).create(model);
 
         String answer = Optional.ofNullable(chatClient.prompt(prompt).call().content()).orElse("");
