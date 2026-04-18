@@ -53,6 +53,12 @@ public class ChatController {
         return ResponseEntity.ok("Session " + sessionId + " cleared.");
     }
 
+    @DeleteMapping("/{sessionId}/clear")
+    public ResponseEntity<String> clearSessionOnUnload(@PathVariable String sessionId) {
+        chatService.clearSession(sessionId);
+        return ResponseEntity.ok("Session cleared.");
+    }
+
     @GetMapping("/{sessionId}/history")
     public ResponseEntity<List<String>> getHistory(@PathVariable String sessionId) {
         return ResponseEntity.ok(chatService.getHistory(sessionId));

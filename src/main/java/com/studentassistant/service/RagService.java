@@ -24,6 +24,9 @@ public class RagService {
             the student's question accurately.
             If the context does not contain enough information, say so honestly.
 
+            Conversation History:
+            {history}
+
             Retrieved Context Quality: {relevanceSummary}
 
             Context:
@@ -45,7 +48,7 @@ public class RagService {
         this.chatClient = chatClientBuilder.build();
     }
 
-    public String getAnswer(String question) {
+    public String getAnswer(String question, List<String> history) {
         SearchRequest searchRequest = SearchRequest.builder().query(question).topK(8).build();
         List<Document> results = Optional.ofNullable(vectorStore.similaritySearch(searchRequest))
                 .orElse(List.of());
@@ -85,9 +88,14 @@ public class RagService {
 
         log.info("Retrieved {} relevant chunks for question", results.size());
 
+        String historyText = (history == null || history.isEmpty())
+                ? "No previous conversation."
+                : String.join("\n", history);
+
         Map<String, Object> model = Map.of(
                 "context", context,
                 "question", question,
+                "history", historyText,
                 "relevanceSummary", relevanceSummary);
         Prompt prompt = new PromptTemplate(RAG_PROMPT_TEMPLATE).create(model);
 

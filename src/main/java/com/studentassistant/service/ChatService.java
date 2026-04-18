@@ -19,9 +19,10 @@ public class ChatService {
     }
 
     public String chat(String sessionId, String userMessage) {
+        List<String> history = new ArrayList<>(getHistory(sessionId));
         conversationHistory.computeIfAbsent(sessionId, k -> new ArrayList<>()).add(userMessage);
 
-        String answer = ragService.getAnswer(userMessage);
+        String answer = ragService.getAnswer(userMessage, history);
 
         conversationHistory.get(sessionId).add("Assistant: " + answer);
 

@@ -537,11 +537,20 @@
         return s;
       }
 
-      let sessionId = localStorage.getItem(STORAGE_KEY);
-      if (!sessionId) {
-        sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem(STORAGE_KEY, sessionId);
+      function generateSessionId() {
+        return 'session-' + Math.random().toString(36).substr(2, 9);
       }
+
+      let sessionId = generateSessionId();
+      localStorage.setItem('studybot-session', sessionId);
+
+      window.addEventListener('beforeunload', function() {
+          const sessionId = localStorage.getItem('studybot-session');
+          if (sessionId) {
+              navigator.sendBeacon('/api/chat/' + sessionId + '/clear',
+                  JSON.stringify({}));
+          }
+      });
 
       const sessionDisplay = document.getElementById('session-display');
       const emptyState = document.getElementById('empty-state');
