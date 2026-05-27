@@ -23,7 +23,7 @@ public class FuzzyRelevanceScorer {
         private final double fuzzyMembership;
 
         public ScoredDocument(Document document, double similarityScore,
-                RelevanceLevel relevanceLevel, double fuzzyMembership) {
+                              RelevanceLevel relevanceLevel, double fuzzyMembership) {
             this.document = document;
             this.similarityScore = similarityScore;
             this.relevanceLevel = relevanceLevel;
@@ -67,18 +67,20 @@ public class FuzzyRelevanceScorer {
         return 0.0;
     }
 
+    // --- UPDATED METHOD: Continuous Triangular Gradient ---
     private double lowRelevanceMembership(double score) {
-        if (score >= 0.70) {
+        // 1. Out of bounds gets 0.0
+        if (score >= 0.70 || score <= 0.30) {
             return 0.0;
         }
-        if (score >= 0.55) {
-            return (score - 0.55) / (0.70 - 0.55);
+        // 2. Right Slope (falling from peak 0.50 down to 0.70)
+        if (score > 0.50) {
+            return (0.70 - score) / (0.70 - 0.50);
         }
-        if (score >= 0.45) {
-            return 1.0;
-        }
-        return Math.max(0.0, (score - 0.30) / (0.45 - 0.30));
+        // 3. Left Slope (rising from 0.30 up to peak 0.50)
+        return (score - 0.30) / (0.50 - 0.30);
     }
+    // ------------------------------------------------------
 
     private double irrelevantMembership(double score) {
         if (score <= 0.45) {
@@ -169,4 +171,3 @@ public class FuzzyRelevanceScorer {
                 counts.get(RelevanceLevel.LOW));
     }
 }
-

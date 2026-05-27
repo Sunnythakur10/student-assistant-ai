@@ -2,9 +2,9 @@ spring:
   application:
     name: student-assistant
   datasource:
-    url: jdbc:postgresql://localhost:5432/student_assistant
+    url: jdbc:postgresql://localhost:5433/student_assistant
     username: postgres
-    password: postgres
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -33,4 +33,4 @@ spring:
         initialize-schema: true
 
 server:
-  port: 8080
+  port: 9090
